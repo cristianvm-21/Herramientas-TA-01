@@ -1,10 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingBag, Store, X } from "lucide-react"
-import { useState } from "react"
+import { LogIn, LogOut, Menu, ShoppingBag, Store, X } from "lucide-react"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import type { User } from "@supabase/supabase-js"
 
 import { Button, buttonVariants } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 import { getCartQuantity, useCartStore } from "@/stores/cart-store"
 import siteConfig from "@/site.config.mjs"
@@ -16,7 +19,30 @@ const links = [
 
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
   const itemCount = useCartStore((state) => getCartQuantity(state.items))
+  const router = useRouter()
+
+  useEffect(() => {
+    const supabase = createClient()
+
+    void supabase.auth.getUser().then(({ data }) => setUser(data.user))
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      router.refresh()
+    })
+
+    return () => authListener.subscription.unsubscribe()
+  }, [router])
+
+  async function handleSignOut() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    setIsOpen(false)
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur">
@@ -46,6 +72,17 @@ export function SiteHeader() {
                 </span>
               )}
           </Link>
+          {user ? (
+            <Button type="button" variant="ghost" className="hidden sm:inline-flex" onClick={handleSignOut}>
+              <LogOut aria-hidden="true" />
+              Cerrar sesión
+            </Button>
+          ) : (
+            <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:inline-flex")}>
+              <LogIn aria-hidden="true" />
+              Ingresar
+            </Link>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -69,6 +106,17 @@ export function SiteHeader() {
               {link.label}
             </Link>
           ))}
+          {user ? (
+            <Button type="button" variant="ghost" className="justify-start" onClick={handleSignOut}>
+              <LogOut aria-hidden="true" />
+              Cerrar sesión
+            </Button>
+          ) : (
+            <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted">
+              <LogIn className="size-4" aria-hidden="true" />
+              Ingresar
+            </Link>
+          )}
         </div>
       </nav>
     </header>
