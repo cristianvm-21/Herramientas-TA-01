@@ -3,6 +3,7 @@
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
+import { getSafeNextPath } from "@/lib/auth-redirect"
 import { createClient } from "@/lib/supabase/server"
 
 export type AuthFormState = {
@@ -35,16 +36,17 @@ function getCredentials(formData: FormData, includesConfirmation: boolean) {
   return { email, password, fieldErrors }
 }
 
-async function getCallbackUrl() {
+async function getCallbackUrl(nextPath: string) {
   const requestHeaders = await headers()
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host")
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "http"
 
-  return host ? `${protocol}://${host}/auth/callback?next=/` : undefined
+  return host ? `${protocol}://${host}/auth/callback?next=${encodeURIComponent(nextPath)}` : undefined
 }
 
 export async function signIn(_: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const { email, password, fieldErrors } = getCredentials(formData, false)
+  const nextPath = getSafeNextPath(String(formData.get("next") ?? ""))
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors }
@@ -57,11 +59,12 @@ export async function signIn(_: AuthFormState, formData: FormData): Promise<Auth
     return { message: "Correo o contraseña incorrectos." }
   }
 
-  redirect("/")
+  redirect(nextPath)
 }
 
 export async function signUp(_: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const { email, password, fieldErrors } = getCredentials(formData, true)
+  const nextPath = getSafeNextPath(String(formData.get("next") ?? ""))
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors }
@@ -71,7 +74,7 @@ export async function signUp(_: AuthFormState, formData: FormData): Promise<Auth
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: await getCallbackUrl() },
+    options: { emailRedirectTo: await getCallbackUrl(nextPath) },
   })
 
   if (error) {
@@ -79,7 +82,7 @@ export async function signUp(_: AuthFormState, formData: FormData): Promise<Auth
   }
 
   if (data.session) {
-    redirect("/")
+    redirect(nextPath)
   }
 
   return { message: "Revisa tu correo para confirmar tu cuenta antes de iniciar sesión." }

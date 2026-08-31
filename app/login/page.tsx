@@ -4,7 +4,13 @@ import { AuthForm } from "@/components/auth/auth-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import siteConfig from "@/site.config.mjs"
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ next?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { next } = await searchParams
+
   return (
     <section className="mx-auto grid min-h-[calc(100svh-8rem)] max-w-md place-items-center px-4 py-10 sm:px-6">
       <Card className="w-full">
@@ -13,7 +19,7 @@ export default function LoginPage() {
           <CardTitle className="mt-2 text-2xl">Iniciar sesión</CardTitle>
           <CardDescription>Accede a tu cuenta de {siteConfig.name}.</CardDescription>
         </CardHeader>
-        <CardContent><AuthForm mode="login" /></CardContent>
+        <CardContent><AuthForm mode="login" nextPath={next} /></CardContent>
       </Card>
     </section>
   )

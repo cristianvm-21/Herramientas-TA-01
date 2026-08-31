@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { LogIn, LogOut, Menu, ShoppingBag, Store, X } from "lucide-react"
+import { LogIn, LogOut, Menu, ShoppingBag, Store, UserRound, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
@@ -73,10 +73,16 @@ export function SiteHeader() {
               )}
           </Link>
           {user ? (
-            <Button type="button" variant="ghost" className="hidden sm:inline-flex" onClick={handleSignOut}>
-              <LogOut aria-hidden="true" />
-              Cerrar sesión
-            </Button>
+            <>
+              <Link href="/account/profile" className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:inline-flex")}>
+                <UserRound aria-hidden="true" />
+                Mi cuenta
+              </Link>
+              <Button type="button" variant="ghost" className="hidden sm:inline-flex" onClick={handleSignOut}>
+                <LogOut aria-hidden="true" />
+                Cerrar sesión
+              </Button>
+            </>
           ) : (
             <Link href="/login" className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:inline-flex")}>
               <LogIn aria-hidden="true" />
@@ -107,10 +113,16 @@ export function SiteHeader() {
             </Link>
           ))}
           {user ? (
-            <Button type="button" variant="ghost" className="justify-start" onClick={handleSignOut}>
-              <LogOut aria-hidden="true" />
-              Cerrar sesión
-            </Button>
+            <>
+              <Link href="/account/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted">
+                <UserRound className="size-4" aria-hidden="true" />
+                Mi cuenta
+              </Link>
+              <Button type="button" variant="ghost" className="justify-start" onClick={handleSignOut}>
+                <LogOut aria-hidden="true" />
+                Cerrar sesión
+              </Button>
+            </>
           ) : (
             <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted">
               <LogIn className="size-4" aria-hidden="true" />

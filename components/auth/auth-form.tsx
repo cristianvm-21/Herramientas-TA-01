@@ -15,14 +15,18 @@ const initialState: AuthFormState = {}
 
 type AuthFormProps = {
   mode: AuthMode
+  nextPath?: string
 }
 
-export function AuthForm({ mode }: AuthFormProps) {
+export function AuthForm({ mode, nextPath = "/" }: AuthFormProps) {
   const isRegister = mode === "register"
   const [state, formAction, isPending] = useActionState(isRegister ? signUp : signIn, initialState)
+  const alternatePath = isRegister ? "/login" : "/register"
+  const alternateHref = `${alternatePath}?next=${encodeURIComponent(nextPath)}`
 
   return (
     <form action={formAction} className="space-y-5" noValidate>
+      <input type="hidden" name="next" value={nextPath} />
       {state.message && (
         <Alert className="border-primary/30 bg-primary/5">
           <AlertDescription>{state.message}</AlertDescription>
@@ -56,7 +60,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <p className="text-center text-sm text-muted-foreground">
         {isRegister ? "¿Ya tienes una cuenta?" : "¿Aún no tienes una cuenta?"}{" "}
-        <Link href={isRegister ? "/login" : "/register"} className="font-medium text-primary hover:underline">
+        <Link href={alternateHref} className="font-medium text-primary hover:underline">
           {isRegister ? "Inicia sesión" : "Regístrate"}
         </Link>
       </p>
