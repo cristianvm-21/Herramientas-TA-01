@@ -30,7 +30,7 @@ export function ProductCard({ product }: { product: Product }) {
       </CardContent>
       <CardFooter className="flex flex-col gap-2 p-4 pt-0">
         <Link href={`/products/${product.id}`} className={buttonVariants({ variant: "outline", className: "w-full" })}>Ver detalle</Link>
-        <AddToCartButton product={product} className="w-full" />
+        <AddToCartButton product={product} className="w-full bg-blue-500" />
       </CardFooter>
     </Card>
   )
