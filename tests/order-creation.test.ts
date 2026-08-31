@@ -33,4 +33,8 @@ describe("preparación de pedidos", () => {
       { productId: 2, unitPrice: 2.49, subtotal: 7.47 },
     ])
   })
+
+  it("rechaza productos que no pudieron validarse desde el catálogo", () => {
+    expect(prepareOrder([{ productId: 3, quantity: 1 }], products)).toBeNull()
+  })
 })

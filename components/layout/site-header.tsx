@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { LogIn, LogOut, Menu, ShoppingBag, Store, UserRound, X } from "lucide-react"
+import { LayoutDashboard, LogIn, LogOut, Menu, ShoppingBag, Store, UserRound, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { User } from "@supabase/supabase-js"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
+import { isAdminRole } from "@/lib/roles"
 import { cn } from "@/lib/utils"
 import { getCartQuantity, useCartStore } from "@/stores/cart-store"
 import siteConfig from "@/site.config.mjs"
@@ -20,16 +21,30 @@ const links = [
 export function SiteHeader() {
   const [isOpen, setIsOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const itemCount = useCartStore((state) => getCartQuantity(state.items))
   const router = useRouter()
 
   useEffect(() => {
     const supabase = createClient()
 
-    void supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    async function syncUser() {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user)
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      if (!data.user) {
+        setIsAdmin(false)
+        return
+      }
+
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle()
+      setIsAdmin(isAdminRole((profile as { role?: "customer" | "admin" } | null)?.role))
+    }
+
+    void syncUser()
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      void syncUser()
       router.refresh()
     })
 
@@ -78,6 +93,7 @@ export function SiteHeader() {
                 <UserRound aria-hidden="true" />
                 Mi cuenta
               </Link>
+              {isAdmin && <Link href="/admin" className={cn(buttonVariants({ variant: "ghost" }), "hidden sm:inline-flex")}><LayoutDashboard aria-hidden="true" />Administración</Link>}
               <Button type="button" variant="ghost" className="hidden sm:inline-flex" onClick={handleSignOut}>
                 <LogOut aria-hidden="true" />
                 Cerrar sesión
@@ -118,6 +134,7 @@ export function SiteHeader() {
                 <UserRound className="size-4" aria-hidden="true" />
                 Mi cuenta
               </Link>
+              {isAdmin && <Link href="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"><LayoutDashboard className="size-4" aria-hidden="true" />Administración</Link>}
               <Button type="button" variant="ghost" className="justify-start" onClick={handleSignOut}>
                 <LogOut aria-hidden="true" />
                 Cerrar sesión

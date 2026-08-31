@@ -92,8 +92,8 @@ export function CheckoutPageContent({ shippingDetails, profileLoadFailed }: Chec
 
         <Card>
           <CardHeader>
-            <CardTitle>Pago simulado</CardTitle>
-            <CardDescription>Ingresa datos de prueba para completar la simulación. No se almacenarán.</CardDescription>
+            <CardTitle>Tarjeta</CardTitle>
+            <CardDescription>Ingresa los datos de tu tarjeta para completar la compra</CardDescription>
           </CardHeader>
           <CardContent><PaymentForm items={items} isShippingComplete={isShippingComplete} /></CardContent>
         </Card>

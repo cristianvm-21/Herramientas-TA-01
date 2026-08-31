@@ -21,7 +21,7 @@ export default async function ProfilePage() {
   return (
     <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex items-center gap-3"><span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground"><UserRound className="size-5" aria-hidden="true" /></span><div><h1 className="text-3xl font-semibold tracking-tight">Mi perfil</h1><p className="mt-1 text-muted-foreground">Gestiona tus datos personales y de entrega.</p></div></div>
-      <AccountNavigation active="profile" />
+      <AccountNavigation active="profile" showOrders={profile.role !== "admin"} />
       <Card><CardHeader><CardTitle>Datos personales</CardTitle></CardHeader><CardContent><ProfileForm profile={profile} /></CardContent></Card>
     </section>
   )

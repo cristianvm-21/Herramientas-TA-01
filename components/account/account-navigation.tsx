@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 
 type AccountNavigationProps = {
   active: "profile" | "orders"
+  showOrders?: boolean
 }
 
 const links = [
@@ -12,10 +13,10 @@ const links = [
   { href: "/account/orders", label: "Mis pedidos", icon: ClipboardList, value: "orders" },
 ] as const
 
-export function AccountNavigation({ active }: AccountNavigationProps) {
+export function AccountNavigation({ active, showOrders = true }: AccountNavigationProps) {
   return (
     <nav className="mb-6 flex flex-wrap gap-2" aria-label="Navegación de mi cuenta">
-      {links.map((link) => {
+      {links.filter((link) => showOrders || link.value !== "orders").map((link) => {
         const Icon = link.icon
         const isActive = link.value === active
 
