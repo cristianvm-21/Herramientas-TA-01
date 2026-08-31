@@ -1,21 +1,16 @@
 import Link from "next/link"
 import { ArrowRight, ShieldCheck, ShoppingBag, Truck } from "lucide-react"
 
-import { ProductGrid } from "@/components/products/product-grid"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { FeaturedProducts } from "@/components/products/featured-products"
 import { buttonVariants } from "@/components/ui/button"
-import { getApiErrorMessage } from "@/lib/api/axios"
 import { getProducts } from "@/lib/api/products"
 import { cn } from "@/lib/utils"
 import siteConfig from "@/site.config.mjs"
 
 export default async function Page() {
-  const result = await getProducts()
-    .then((items) => ({ products: items.slice(0, 4), errorMessage: null }))
-    .catch((error: unknown) => ({
-      products: [],
-      errorMessage: getApiErrorMessage(error),
-    }))
+  const initialProducts = await getProducts()
+    .then((items) => items.slice(0, 4))
+    .catch(() => null)
   return (
     <>
       <section className="bg-surface">
@@ -70,14 +65,7 @@ export default async function Page() {
             Ver todo
           </Link>
         </div>
-        {result.errorMessage ? (
-          <Alert className="border-destructive/30">
-            <AlertTitle>No se pudo cargar el catálogo</AlertTitle>
-            <AlertDescription>{result.errorMessage}</AlertDescription>
-          </Alert>
-        ) : (
-          <ProductGrid products={result.products} />
-        )}
+        <FeaturedProducts initialProducts={initialProducts} />
       </section>
       <section className="border-y bg-surface">
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:px-8">
