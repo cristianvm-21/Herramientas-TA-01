@@ -94,3 +94,15 @@ No se necesita un archivo `vercel.json`: Vercel detecta Next.js y el archivo `pn
 - `.env.local` está excluido de Git; no publiques credenciales reales.
 - La clave publicable de Supabase no sustituye las políticas RLS: estas permanecen activas en las tablas.
 - La aplicación nunca guarda datos de tarjeta; el pago es únicamente simulado.
+
+## Integración continua
+
+El workflow [ci.yml](.github/workflows/ci.yml) se ejecuta en cada `push` y `pull request`. Instala las dependencias con `pnpm install --frozen-lockfile` y valida, en este orden:
+
+```text
+pnpm lint
+pnpm test
+pnpm build
+```
+
+Una ejecución fallida debe corregirse antes de integrar el cambio. Vercel puede continuar desplegando desde Git; la protección obligatoria de la rama se configura en GitHub después de subir este workflow.

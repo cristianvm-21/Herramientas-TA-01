@@ -1,0 +1,42 @@
+name: Validación continua
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, pruebas y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v6
+
+      - name: Configurar Node.js y pnpm
+        uses: pnpm/setup@v1
+        with:
+          version: 11.2.2
+          runtime: node@24
+          install: false
+          cache: true
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Ejecutar lint
+        run: pnpm lint
+
+      - name: Ejecutar pruebas
+        run: pnpm test
+
+      - name: Generar build de producción
+        run: pnpm build
